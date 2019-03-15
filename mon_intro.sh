@@ -17,8 +17,9 @@ cd docker-elk && docker-compose up -d
 }
 
 function stop_docker_elk(){
-echo "Stopping the Docker ELK project"
+echo "Stopping and removing Docker projects"
 cd docker-elk && docker-compose stop
+cd .. && rm -rf docker-elk
 }
 
 
