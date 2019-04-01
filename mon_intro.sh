@@ -18,10 +18,10 @@ echo "Downloading the Docker projects"
 cd $workdir/docker-elk && docker-compose up -d
 
 echo "Adding my_awesome.log file on /var/log/my_awesome.log"
-journalctl -u docker > /var/log/my_awesome.log &
+journalctl -u docker > $workdir/my_awesome.log &
 
 echo "Adding my_awesome.log contents into Logstash on http://localhost:5000/"
-nc localhost 5000 < /var/log/my_awesome.log
+nc localhost 5000 < $workdir/my_awesome.log
 
 echo "Starting Kibana with a default index-pattern"
 curl -XPOST -D- 'http://localhost:5601/api/saved_objects/index-pattern' \
