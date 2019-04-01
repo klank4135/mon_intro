@@ -16,6 +16,18 @@ echo "Downloading the Docker projects"
 	fi
 
 cd $workdir/docker-elk && docker-compose up -d
+
+echo "Adding my_awesome.log file on /var/log/my_awesome.log"
+journalctl -u docker > /var/log/my_awesome.log &
+
+echo "Adding my_awesome.log contents into Logstash on http://localhost:5000/"
+nc localhost 5000 < /var/log/my_awesome.log
+
+echo "Starting Kibana with a default index-pattern"
+curl -XPOST -D- 'http://localhost:5601/api/saved_objects/index-pattern' \
+    -H 'Content-Type: application/json' \
+    -H 'kbn-version: 6.6.1' \
+    -d '{"attributes":{"title":"logstash-*","timeFieldName":"@timestamp"}}'
 }
 
 function start_mon_talk(){
