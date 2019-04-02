@@ -16,18 +16,6 @@ echo "Downloading the Docker projects"
 	fi
 
 cd $workdir/docker-elk && docker-compose up -d
-
-echo "Adding my_awesome.log file on /var/log/my_awesome.log"
-journalctl -u docker > $workdir/my_awesome.log &
-
-echo "Adding my_awesome.log contents into Logstash on http://localhost:5000/"
-nc localhost 5000 < $workdir/my_awesome.log
-
-echo "Starting Kibana with a default index-pattern"
-curl -XPOST -D- 'http://localhost:5601/api/saved_objects/index-pattern' \
-    -H 'Content-Type: application/json' \
-    -H 'kbn-version: 6.6.1' \
-    -d '{"attributes":{"title":"logstash-*","timeFieldName":"@timestamp"}}'
 }
 
 function start_mon_talk(){
@@ -38,8 +26,24 @@ function start_mon_talk(){
 		echo "Cloning the repository https://github.com/klank4135/mon-talk.git"
 		git clone https://github.com/klank4135/mon-talk.git $workdir/mon-talk
 	fi
-
 cd $workdir/mon-talk && docker-compose up -d
+}
+
+function setup_logs(){
+
+	echo "Adding my_elastic.log file on my_elastic.log"
+	docker logs -f docker-elk_elasticsearch_1 > $workdir/my_awesome.log &
+
+	echo "Adding my_awesome.log contents into Logstash on http://localhost:5000/"
+	nc localhost 5000 < $workdir/my_awesome.log&
+
+	sleep .15
+
+	echo "Starting Kibana with a default index-pattern"
+	curl -XPOST -D- 'http://localhost:5601/api/saved_objects/index-pattern' \
+    -H 'Content-Type: application/json' \
+    -H 'kbn-version: 6.6.1' \
+    -d '{"attributes":{"title":"logstash-*","timeFieldName":"@timestamp"}}'
 }
 
 function stop_docker_elk(){
@@ -58,4 +62,6 @@ if [ "$@" == "start" ]; then
 elif [ "$@" == "stop" ]; then
 	stop_docker_elk
 	stop_mon_talk 
+elif [ "$@" == "setup" ]; then
+	setup_logs
 fi
