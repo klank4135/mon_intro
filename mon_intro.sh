@@ -31,17 +31,21 @@ cd $workdir/mon-talk && docker-compose up -d
 
 function setup_logs(){
 
-	echo "Adding my_elastic.log file on my_elastic.log"
-	docker logs -f docker-elk_elasticsearch_1 > $workdir/my_awesome.log &
+	echo "Starting a Demo App to create demo logs"
+	git clone https://github.com/chentex/random-logger $workdir/random-logger
+	cd $workdir/random-logger && docker-compose up -d
+
+	echo "Adding my_awesome.log file on my_awesome.log"
+	docker logs -f random-logger_random-logger_1 > $workdir/my_awesome.log &
 
 	echo "Adding my_awesome.log contents into Logstash on http://localhost:5000/"
 	nc localhost 5000 < $workdir/my_awesome.log&
 
-	sleep .15
+	sleep .30
 
 	echo "Starting Kibana with a default index-pattern"
 	curl -XPOST -D- 'http://localhost:5601/api/saved_objects/index-pattern' \
-    -H 'Content-Type: application/json' \
+    -H 'Content-Type: text/plain' \
     -H 'kbn-version: 6.6.1' \
     -d '{"attributes":{"title":"logstash-*","timeFieldName":"@timestamp"}}'
 }

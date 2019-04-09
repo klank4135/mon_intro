@@ -1,0 +1,10 @@
+# mon-talk
+# Alexander Morales Villatoro
+# @klank
+# All references to the current file could be founded on
+# https://finestructure.co/blog/2016/5/16/monitoring-with-prometheus-grafana-docker-part-1
+
+version: '2'
+services:
+    random-logger:
+        image: chentex/random-logger
