@@ -1,12 +1,10 @@
 #!/bin/bash
 workdir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
-delk="docker-elk"
-mtalk="mon-talk"
-
 echo "##### Welcome to mon_intro project #####"
 
 function start_docker_elk(){
 echo "Downloading the Docker projects"
+delk="docker-elk"
 	if [ -d "$delk" ]; then
 		echo "$delk repository found."
 		echo "Building and starting docker-elk stack"
@@ -19,6 +17,7 @@ cd $workdir/docker-elk && docker-compose up -d
 }
 
 function start_mon_talk(){
+mtalk="mon-talk"
 	if [ -d "$mtalk" ]; then
 		echo "$mtalk repository found"
 		echo "Building and starting Prometheous and Grafana Containers"
