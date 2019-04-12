@@ -29,6 +29,28 @@ function start_mon_talk(){
 cd $workdir/mon-talk && docker-compose up -d
 }
 
+function start_jaeger(){
+echo "Starting Jaeger Container"
+docker run -d --name jaeger \
+	-e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
+  	-p 5775:5775/udp \
+  	-p 6831:6831/udp \
+  	-p 6832:6832/udp \
+  	-p 5778:5778 \
+  	-p 16686:16686 \
+  	-p 14268:14268 \
+  	-p 9411:9411 \
+  	jaegertracing/all-in-one:1.8
+
+echo "Starting Demo Application"
+docker run -d --name jaeger_hotrod \
+  --link jaeger \
+  -p8880-8883:8080-8083 \
+  -e JAEGER_AGENT_HOST="jaeger" \
+  jaegertracing/example-hotrod:1.8 \
+  all
+}
+
 function setup_logs(){
 
 	echo "Starting a Demo App to create demo logs"
@@ -51,21 +73,37 @@ function setup_logs(){
 }
 
 function stop_docker_elk(){
-echo "Stopping and removing Docker ELK projects"
+
+echo "Stop and remove Docker ELK projects"
 cd $workdir/docker-elk && docker-compose stop
+
 }
 
 function stop_mon_talk(){
-echo "Stopping and removing Docker Mon-Intro projects"
+
+echo "Stop and remove Docker Mon-Intro projects"
 cd $workdir/mon-talk && docker-compose stop
+
+}
+
+function stop_jaeger(){
+
+echo "Stop and remove Jaeger Docker Containers"
+
+docker stop jaeger
+docker rm -f jaeger
+docker stop jaeger_hotrod
+docker rm -f jaeger_hotrod
 }
 
 if [ "$@" == "start" ]; then
 	start_docker_elk
 	start_mon_talk
+	start_jaeger
 elif [ "$@" == "stop" ]; then
 	stop_docker_elk
-	stop_mon_talk 
+	stop_mon_talk
+	stop_jaeger
 elif [ "$@" == "setup" ]; then
 	setup_logs
 fi
